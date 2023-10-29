@@ -152,18 +152,39 @@ class MessageDifferencer():
     def _compare_repeated_field(
             self, cmp_args: ProtoFieldComparisonArgs[Iterable]
     ) -> ProtoComparisonResult:
-        as_set_key = lambda x: str(x)
+        # Copy first to avoid modifying the original inputs.
+        expected_list = list(cmp_args.expected)
+        actual_list = list(cmp_args.actual)
         if self._opts.repeated_field_comp == RepeatedFieldComparison.AS_SET:
-            cmp_args.expected.sort(key=as_set_key)
-            cmp_args.actual.sort(key=as_set_key)
+            # Identify as many matches as possible to minimize the number of
+            # reported diffs.
+            for expected in list(expected_list):
+                for actual in list(actual_list):
+                    item_result = self._compare_value(
+                        ProtoFieldComparisonArgs(expected=expected,
+                                                 actual=actual,
+                                                 field_desc=cmp_args.field_desc,
+                                                 field_path=cmp_args.field_path))
+                    if item_result.is_equal:
+                        actual_list.remove(actual)
+                        expected_list.remove(expected)
+                        break
+            # If diffs remain, best-effort sort the lists to minimize the number
+            # of diffs between each element.
+            # (This is only best-effort because it fails to overlook ignored
+            # fields.)
+            as_set_key = lambda x: str(x)
+            expected_list.sort(key=as_set_key)
+            actual_list.sort(key=as_set_key)
+
         return _combine_results([
             self._compare_value(
                 ProtoFieldComparisonArgs(expected=expected,
                                          actual=actual,
                                          field_desc=cmp_args.field_desc,
                                          field_path=cmp_args.field_path))
-            for expected, actual in iter_util.zip_pairs(cmp_args.expected,
-                                                        cmp_args.actual)
+            for expected, actual in iter_util.zip_pairs(expected_list,
+                                                        actual_list)
         ])
 
     def _compare_map(
