@@ -1,12 +1,12 @@
-# proto-matcher
+# hamcrest-proto
 
-Test matchers for Protobuffer in Python.
+[Hamcrest](https://pypi.org/project/PyHamcrest/) matchers for [Protocol Buffers](https://protobuf.dev/) in Python.
 
-This is based on [MessageDifferencer](https://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.util.message_differencer) as well as the [EqualsProto](https://github.com/google/googletest/issues/1761) googletest matcher.
+This is forked from [proto-matcher](https://pypi.org/project/proto-matcher/) which was no longer receiving updates and which was itself based on [MessageDifferencer](https://developers.google.com/protocol-buffers/docs/reference/cpp/google.protobuf.util.message_differencer) and [EqualsProto](https://github.com/google/googletest/issues/1761) googletest matcher.
 
 ## API
 
-This packages provides the following [PyHamcrest](https://github.com/hamcrest/PyHamcrest) matchers:
+This packages provides the following proto-related [matchers](https://pyhamcrest.readthedocs.io/en/latest/library.html):
 
 ### `equals_proto`
 
