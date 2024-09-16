@@ -213,6 +213,14 @@ class ProtoCompareTest(unittest.TestCase):
         self.assertProtoCompareToBe(compare.proto_compare(actual, expected),
                                     False)
 
+    def test_empty_submessage(self):
+        expected = text_format.Parse(_TEST_PROTO, test_pb2.Foo())
+        actual = text_format.Parse(_TEST_PROTO, test_pb2.Foo())
+        expected.baz.ClearField("status")
+        actual.baz.ClearField("status")
+        self.assertProtoCompareToBe(compare.proto_compare(actual, expected),
+                                    True)
+
     def test_compare_proto_ignoring_fields(self):
         # a: 1,      2,    3, 9, 4, 5, 7,   2
         # b:   9, 0, 2, 7, 3,    4, 5,   6, 2

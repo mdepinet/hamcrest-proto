@@ -7,6 +7,7 @@ proto_library(
     name = "test_proto",
     testonly = True,
     srcs = ["test.proto"],
+    deps = ["@com_google_protobuf//:struct_proto"],
 )
 
 py_proto_library(
