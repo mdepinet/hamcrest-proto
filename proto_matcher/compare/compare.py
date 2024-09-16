@@ -8,9 +8,11 @@ from typing import Any, Generic, Iterable, List, Mapping, Optional, Set, TypeVar
 
 from google.protobuf import descriptor
 from google.protobuf import message
+from google.protobuf import struct_pb2
 
 from proto_matcher.compare import iter_util
 
+STRUCT_TYPES = (struct_pb2.Struct, struct_pb2.Value, struct_pb2.ListValue)
 _FieldDescriptor = descriptor.FieldDescriptor
 _FLT_EPSILON = 1.19209e-07
 _DBL_EPSILON = sys.float_info.epsilon
@@ -218,6 +220,12 @@ class MessageDifferencer():
         if _is_message(cmp_args.field_desc):
             if cmp_args.expected and cmp_args.actual:
                 return self._compare(cmp_args)
+            if (isinstance(cmp_args.expected, STRUCT_TYPES) and
+                    isinstance(cmp_args.actual, STRUCT_TYPES) and
+                    cmp_args.expected == cmp_args.actual):
+                # Struct types are special in that their empty values are falsey
+                # so they aren't caught by the first condition.
+                return _equality_result()
             return _inequality_result(cmp_args)
         if _is_float(cmp_args.field_desc):
             return self._compare_float(cmp_args)
@@ -228,8 +236,9 @@ class MessageDifferencer():
             self, cmp_args: ProtoFieldComparisonArgs) -> ProtoComparisonResult:
         if cmp_args.expected == cmp_args.actual:
             return _equality_result()
-        if (self._opts.treating_nan_as_equal and math.isnan(expected) and
-                math.isnan(actual)):
+        if (self._opts.treating_nan_as_equal and
+                math.isnan(cmp_args.expected) and
+                math.isnan(cmp_args.actual)):
             return _equality_result()
 
         if self._opts.float_comp == ProtoFloatComparison.EXACT:
