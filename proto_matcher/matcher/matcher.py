@@ -67,7 +67,7 @@ def approximately(matcher: _ProtoMatcher,
     return matcher
 
 
-def ignoring_field_paths(field_paths: Set[Tuple[str]],
+def ignoring_field_paths(field_paths: Set[Tuple[str, ...]],
                          matcher: _ProtoMatcher) -> _ProtoMatcher:
     opts = matcher.mut_options()
     opts.ignore_field_paths = field_paths

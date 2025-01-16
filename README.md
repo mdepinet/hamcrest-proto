@@ -27,7 +27,7 @@ Test the argument equals the given protobuf message, while comparing any float f
 ### `ignoring_field_paths`
 
 ```python
-ignoring_field_paths(field_paths: Set[Tuple[str]],
+ignoring_field_paths(field_paths: Set[Tuple[str, ...]],
                      matcher: _ProtoMatcher)
 ```
 Test the argument equals the given protobuf message, while ignoring those fields specified in the field paths.

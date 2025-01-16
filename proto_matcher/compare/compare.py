@@ -37,7 +37,7 @@ class ProtoFloatComparison(enum.Enum):
 class ProtoComparisonOptions:
     repeated_field_comp: RepeatedFieldComparison = RepeatedFieldComparison.AS_LIST
     scope: ProtoComparisonScope = ProtoComparisonScope.FULL
-    ignore_field_paths: Optional[Set[Tuple[str]]] = None
+    ignore_field_paths: Optional[Set[Tuple[str, ...]]] = None
     treating_nan_as_equal: bool = False
     float_comp: ProtoFloatComparison = ProtoFloatComparison.EXACT
     # |float_margin| and |float_fraction| are only used when
@@ -87,7 +87,7 @@ class ProtoFieldComparisonArgs(Generic[T]):
     expected: T
     actual: T
     field_desc: _FieldDescriptor
-    field_path: Tuple[str]
+    field_path: Tuple[str, ...]
 
 
 class MessageDifferencer():
@@ -104,7 +104,7 @@ class MessageDifferencer():
         self,
         expected: message.Message,
         actual: message.Message,
-        field_path: Tuple[str] = ()
+        field_path: Tuple[str, ...] = ()
     ) -> ProtoComparisonResult:
         return _combine_results([
             self._compare(
