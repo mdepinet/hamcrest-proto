@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hamcrest_proto",
-    version="0.0.5",
+    version="0.0.6",
     author="mdepinet",
     author_email="",
     description="Hamcrest matchers for protobufs",
