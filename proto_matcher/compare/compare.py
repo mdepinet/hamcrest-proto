@@ -138,7 +138,7 @@ class MessageDifferencer():
         cmp_args.actual = getattr(cmp_args.actual, field_name, None)
 
         # Repeated field
-        if cmp_args.field_desc.label == _FieldDescriptor.LABEL_REPEATED:
+        if _is_repeated(cmp_args.field_desc):
             # Map field
             if isinstance(cmp_args.expected, collections.abc.Mapping):
                 return self._compare_map(cmp_args)
@@ -260,6 +260,15 @@ def _combine_results(
         explanation='\n'.join(
             [res.explanation for res in results if res.explanation]),
     )
+
+
+def _is_repeated(field_desc: _FieldDescriptor) -> bool:
+    # Newer protobuf runtimes removed FieldDescriptor.label in favor of the
+    # is_repeated property; older ones (< 4.21) only have label.
+    is_repeated = getattr(field_desc, 'is_repeated', None)
+    if is_repeated is not None:
+        return is_repeated
+    return field_desc.label == _FieldDescriptor.LABEL_REPEATED
 
 
 def _is_message(field_desc: _FieldDescriptor) -> bool:
