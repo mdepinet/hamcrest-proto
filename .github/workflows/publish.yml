@@ -1,0 +1,28 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # For PyPI Trusted Publishing (OIDC); no stored credentials.
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check the release tag matches setup.py's version
+        run: |
+          VERSION="$(sed -n 's/.*version="\([^"]*\)".*/\1/p' setup.py)"
+          if [ "$VERSION" != "$GITHUB_REF_NAME" ]; then
+            echo "setup.py has version $VERSION but the release tag is $GITHUB_REF_NAME" >&2
+            exit 1
+          fi
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: pip install build
+      - run: python -m build
+      - uses: pypa/gh-action-pypi-publish@release/v1
