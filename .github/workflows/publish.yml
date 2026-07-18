@@ -5,13 +5,11 @@ on:
     types: [published]
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    environment: release
     permissions:
-      # For PyPI Trusted Publishing (OIDC); no stored credentials.
-      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
       - name: Check the release tag matches setup.py's version
@@ -26,4 +24,23 @@ jobs:
           python-version: "3.x"
       - run: pip install build
       - run: python -m build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  # Publishing is a separate job so no repository-controlled code runs while the
+  # OIDC token for PyPI Trusted Publishing (no stored credentials) is available.
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: build
+    environment: release
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
       - uses: pypa/gh-action-pypi-publish@release/v1
