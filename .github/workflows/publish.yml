@@ -8,6 +8,7 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    environment: release
     permissions:
       # For PyPI Trusted Publishing (OIDC); no stored credentials.
       id-token: write
