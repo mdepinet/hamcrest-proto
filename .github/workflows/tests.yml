@@ -1,0 +1,60 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: protobuf ${{ matrix.protobuf || 'latest' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        # One representative per protobuf major version, each on a Python it
+        # supports. The empty pin means "latest release", so new majors get
+        # covered here before they get their own pinned entry.
+        include:
+          - protobuf: "3.20.*"
+            python: "3.9"
+          - protobuf: "4.25.*"
+            python: "3.11"
+          - protobuf: "5.29.*"
+            python: "3.12"
+          - protobuf: "6.*"
+            python: "3.13"
+          - protobuf: ""
+            python: "3.x"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install dependencies
+        run: |
+          pip install pytest pyhamcrest
+          if [ -n "${{ matrix.protobuf }}" ]; then
+            pip install "protobuf==${{ matrix.protobuf }}"
+          else
+            pip install protobuf
+          fi
+      - name: Install the protoc matching the protobuf runtime
+        # The runtime rejects gencode newer than itself and old runtimes lack
+        # the APIs new gencode calls, so the test proto must be compiled with
+        # the protoc release paired with the installed runtime: pip 3.X.Y maps
+        # to protoc v3.X.Y, and pip MAJOR.MINOR.PATCH maps to protoc
+        # vMINOR.PATCH from 4.x on.
+        run: |
+          PB="$(python -c 'import google.protobuf as pb; print(pb.__version__)')"
+          case "$PB" in
+            3.*) PROTOC="$PB" ;;
+            *) PROTOC="${PB#*.}" ;;
+          esac
+          curl -fsSL -o /tmp/protoc.zip "https://github.com/protocolbuffers/protobuf/releases/download/v${PROTOC}/protoc-${PROTOC}-linux-x86_64.zip"
+          unzip -q /tmp/protoc.zip -d "$HOME/protoc"
+          echo "$HOME/protoc/bin" >> "$GITHUB_PATH"
+      - name: Generate test protos
+        run: protoc -I. -I"$HOME/protoc/include" --python_out=. proto_matcher/testdata/test.proto
+      - run: python -m pytest proto_matcher
