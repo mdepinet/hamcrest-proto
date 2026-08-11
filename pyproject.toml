@@ -27,9 +27,10 @@ build-backend = "uv_build"
 module-name = "proto_matcher"
 module-root = ""
 # Generated protobuf code must never ship: consumers regenerate against their
-# own runtime, and the runtime rejects gencode newer than itself.
-source-exclude = ["**/*_pb2.py", "**/*_pb2.pyi"]
-wheel-exclude = ["**/*_pb2.py", "**/*_pb2.pyi"]
+# own runtime, and the runtime rejects gencode newer than itself. The test
+# proto source is dev-only, so it stays out of published artifacts too.
+source-exclude = ["**/*_pb2.py", "**/*_pb2.pyi", "proto_matcher/testdata"]
+wheel-exclude = ["**/*_pb2.py", "**/*_pb2.pyi", "proto_matcher/testdata"]
 
 [dependency-groups]
 dev = [

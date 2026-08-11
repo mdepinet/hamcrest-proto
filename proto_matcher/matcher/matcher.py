@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Union
-
 from google.protobuf import message
 from google.protobuf import text_format
 from hamcrest.core.base_matcher import BaseMatcher
@@ -14,15 +12,13 @@ from proto_matcher.compare import ProtoFloatComparison
 from proto_matcher.compare import RepeatedFieldComparison
 from proto_matcher.compare import proto_compare
 
-_ProtoValue = Union[str, message.Message]
-
 # Declared as the plain hamcrest interface (not _EqualsProto) so that pyright
 # resolves compositions like not_(equals_proto(...)) to Matcher[Message].
 _ProtoMatcher = Matcher[message.Message]
 
 
 class _EqualsProto(BaseMatcher[message.Message]):
-    def __init__(self, msg: _ProtoValue):
+    def __init__(self, msg: str | message.Message):
         self._msg = msg
         self._opts = ProtoComparisonOptions()
 
@@ -51,7 +47,7 @@ class _EqualsProto(BaseMatcher[message.Message]):
         description.append_text(f"a protobuf of:\n{self._msg}")
 
 
-def equals_proto(expected: _ProtoValue) -> _ProtoMatcher:
+def equals_proto(expected: str | message.Message) -> _ProtoMatcher:
     return _EqualsProto(expected)
 
 
