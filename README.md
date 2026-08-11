@@ -11,7 +11,7 @@ This packages provides the following proto-related [matchers](https://pyhamcrest
 ### `equals_proto`
 
 ```python
-equals_proto(message: Union[Message, str])
+equals_proto(message: Message | str)
 ```
 Test the argument equals the given protobuf message.
 
@@ -19,15 +19,15 @@ Test the argument equals the given protobuf message.
 
 ```python
 approximately(proto_matcher: Matcher[Message],
-              float_margin: Optional[float] = None,
-              float_fraction: Optional[float] = None)
+              float_margin: float | None = None,
+              float_fraction: float | None = None)
 ```
 Test the argument equals the given protobuf message, while comparing any float field using approximation.
 
 ### `ignoring_field_paths`
 
 ```python
-ignoring_field_paths(field_paths: Set[Tuple[str, ...]],
+ignoring_field_paths(field_paths: set[tuple[str, ...]],
                      matcher: _ProtoMatcher)
 ```
 Test the argument equals the given protobuf message, while ignoring those fields specified in the field paths.
@@ -47,3 +47,15 @@ Test the argument equals the given protobuf message, ignoring the ordering of an
 partially(proto_matcher: Matcher[Message])
 ```
 Test the argument partially equals the given protobuf message, i.e. if a field is in the argument but not in the expected message, it's ignored in the comparsion.
+
+## Development
+
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management and
+[just](https://github.com/casey/just) as a command runner.
+
+```sh
+just install   # create the venv and generate the test protos
+just           # format, run all checks (ruff, pyright, deptry), and test
+```
+
+See the `Justfile` for individual recipes.
