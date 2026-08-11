@@ -51,6 +51,8 @@ isort.force-single-line = true
 isort.single-line-exclusions = ["typing", "collections.abc", "hamcrest"]
 
 [tool.pyright]
+# Check against the oldest supported Python, not whichever interpreter uv picks.
+pythonVersion = "3.9"
 exclude = ["build", "dist", ".venv", "**/__pycache__"]
 
 [tool.deptry]

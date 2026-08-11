@@ -18,15 +18,16 @@ jobs:
       - run: just check
 
   test:
-    name: protobuf ${{ matrix.protobuf || 'latest' }}
+    name: protobuf ${{ matrix.protobuf || 'lockfile' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
         # One representative per protobuf major version, each on a Python it
-        # supports. The empty pin means "latest release", so new majors get
-        # covered here before they get their own pinned entry.
+        # supports. The empty pin means "whatever uv.lock pins" (kept fresh by
+        # dependabot), so new majors get covered by lock bumps before they get
+        # their own pinned entry here.
         include:
           - protobuf: "3.20.*"
             python: "3.9"
@@ -46,7 +47,7 @@ jobs:
       - name: Install dependencies
         # Just the test group: the dev tools don't need to support every
         # Python in the matrix.
-        run: uv sync --no-default-groups --group test
+        run: uv sync --locked --no-default-groups --group test
       - name: Pin the protobuf runtime under test
         if: matrix.protobuf != ''
         run: uv pip install "protobuf==${{ matrix.protobuf }}"

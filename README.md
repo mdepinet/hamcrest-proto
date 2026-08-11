@@ -11,14 +11,14 @@ This packages provides the following proto-related [matchers](https://pyhamcrest
 ### `equals_proto`
 
 ```python
-equals_proto(message: Message | str)
+equals_proto(expected: Message | str)
 ```
 Test the argument equals the given protobuf message.
 
 ### `approximately`
 
 ```python
-approximately(proto_matcher: Matcher[Message],
+approximately(matcher: Matcher[Message],
               float_margin: float | None = None,
               float_fraction: float | None = None)
 ```
@@ -28,7 +28,7 @@ Test the argument equals the given protobuf message, while comparing any float f
 
 ```python
 ignoring_field_paths(field_paths: set[tuple[str, ...]],
-                     matcher: _ProtoMatcher)
+                     matcher: Matcher[Message])
 ```
 Test the argument equals the given protobuf message, while ignoring those fields specified in the field paths.
 
@@ -36,7 +36,7 @@ Test the argument equals the given protobuf message, while ignoring those fields
 ### `ignoring_repeated_field_ordering`
 
 ```python
-ignoring_repeated_field_ordering(proto_matcher: Matcher[Message])
+ignoring_repeated_field_ordering(matcher: Matcher[Message])
 ```
 Test the argument equals the given protobuf message, ignoring the ordering of any repeated field.
 
@@ -44,7 +44,7 @@ Test the argument equals the given protobuf message, ignoring the ordering of an
 ### `partially`
 
 ```python
-partially(proto_matcher: Matcher[Message])
+partially(matcher: Matcher[Message])
 ```
 Test the argument partially equals the given protobuf message, i.e. if a field is in the argument but not in the expected message, it's ignored in the comparsion.
 

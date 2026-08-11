@@ -2,6 +2,7 @@ import unittest
 
 from google.protobuf import text_format
 from hamcrest import assert_that, not_
+from hamcrest.core.string_description import StringDescription
 
 from proto_matcher.compare import compare
 from proto_matcher.matcher.matcher import approximately
@@ -241,6 +242,28 @@ class ProtoCompareTest(unittest.TestCase):
                 ignored_fields, ignoring_repeated_field_ordering(equals_proto(expected))
             ),
         )
+
+    def test_describe_mismatch_reports_missing_repeated_element(self):
+        expected = test_pb2.Foo(
+            bars=[test_pb2.Bar(short_id=1), test_pb2.Bar(short_id=2)]
+        )
+        actual = test_pb2.Foo(bars=[test_pb2.Bar(short_id=1)])
+
+        description = StringDescription()
+        equals_proto(expected).describe_mismatch(actual, description)
+
+        self.assertEqual(str(description), "modified: bars: short_id: 2\n -> None\n")
+
+    def test_modifiers_reject_non_proto_matchers(self):
+        modifiers = (
+            partially,
+            approximately,
+            ignoring_repeated_field_ordering,
+            lambda matcher: ignoring_field_paths(set(), matcher),
+        )
+        for modifier in modifiers:
+            with self.subTest(modifier=modifier), self.assertRaises(TypeError):
+                modifier(not_(equals_proto(_TEST_PROTO)))
 
 
 if __name__ == "__main__":

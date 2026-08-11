@@ -364,6 +364,21 @@ class ProtoCompareTest(unittest.TestCase):
             compare.proto_compare(actual, expected, opts=opts), True
         )
 
+    def test_repeated_field_inequality_explanation_aligns_by_index(self):
+        expected = test_pb2.Foo(
+            bars=[
+                test_pb2.Bar(short_id=1),
+                test_pb2.Bar(short_id=2),
+                test_pb2.Bar(short_id=3),
+            ]
+        )
+        actual = test_pb2.Foo(bars=[test_pb2.Bar(short_id=1), test_pb2.Bar(short_id=2)])
+
+        result = compare.proto_compare(actual, expected)
+
+        self.assertFalse(result.is_equal)
+        self.assertEqual(result.explanation, "modified: bars: short_id: 3\n -> None\n")
+
 
 if __name__ == "__main__":
     unittest.main()

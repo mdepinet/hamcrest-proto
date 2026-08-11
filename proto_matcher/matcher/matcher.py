@@ -56,6 +56,10 @@ def equals_proto(expected: _ProtoValue) -> _ProtoMatcher:
 
 
 def partially(matcher: _ProtoMatcher) -> _ProtoMatcher:
+    """Makes the matcher ignore fields absent from the expected proto.
+
+    Only composes with matchers created by equals_proto.
+    """
     _mut_options(matcher).scope = ProtoComparisonScope.PARTIAL
     return matcher
 
@@ -65,6 +69,10 @@ def approximately(
     float_margin: float | None = None,
     float_fraction: float | None = None,
 ) -> _ProtoMatcher:
+    """Makes the matcher compare float fields approximately.
+
+    Only composes with matchers created by equals_proto.
+    """
     opts = _mut_options(matcher)
     opts.float_comp = ProtoFloatComparison.APPROXIMATE
     if float_margin:
@@ -77,12 +85,20 @@ def approximately(
 def ignoring_field_paths(
     field_paths: set[tuple[str, ...]], matcher: _ProtoMatcher
 ) -> _ProtoMatcher:
+    """Makes the matcher ignore the given field paths.
+
+    Only composes with matchers created by equals_proto.
+    """
     opts = _mut_options(matcher)
     opts.ignore_field_paths = field_paths
     return matcher
 
 
 def ignoring_repeated_field_ordering(matcher: _ProtoMatcher) -> _ProtoMatcher:
+    """Makes the matcher compare repeated fields regardless of ordering.
+
+    Only composes with matchers created by equals_proto.
+    """
     opts = _mut_options(matcher)
     opts.repeated_field_comp = RepeatedFieldComparison.AS_SET
     return matcher
@@ -91,6 +107,7 @@ def ignoring_repeated_field_ordering(matcher: _ProtoMatcher) -> _ProtoMatcher:
 def _mut_options(matcher: _ProtoMatcher) -> ProtoComparisonOptions:
     if not isinstance(matcher, _EqualsProto):
         raise TypeError(
-            f"proto matcher modifiers only compose with equals_proto, got {matcher}"
+            "proto matcher modifiers only compose with equals_proto, "
+            f"got {type(matcher).__name__}"
         )
     return matcher.mut_options()

@@ -14,8 +14,12 @@ def zip_pairs(
     if not key:
         key = lambda x: 0
 
-    xs = sorted(xs, key=key, reverse=True)
-    ys = sorted(ys, key=key, reverse=True)
+    # Reverse the *stable* sort (not sorted(reverse=True), which keeps ties in
+    # input order): the default key ties every element and the loop below pops
+    # from the tail, so ties must come out in input order to keep
+    # repeated-field diffs index-aligned.
+    xs = sorted(xs, key=key)[::-1]
+    ys = sorted(ys, key=key)[::-1]
 
     while xs or ys:
         if not xs:
