@@ -379,6 +379,17 @@ class ProtoCompareTest(unittest.TestCase):
         self.assertFalse(result.is_equal)
         self.assertEqual(result.explanation, "modified: bars: short_id: 3\n -> None\n")
 
+    def test_sparse_enum_inequality_explanation_uses_enum_name(self):
+        expected = test_pb2.Foo()
+        expected.baz.status = test_pb2.Baz.OBSOLETE
+        actual = test_pb2.Foo()
+        actual.baz.status = test_pb2.Baz.OK
+
+        result = compare.proto_compare(actual, expected)
+
+        self.assertFalse(result.is_equal)
+        self.assertEqual(result.explanation, "modified: baz.status: OBSOLETE -> OK\n")
+
 
 if __name__ == "__main__":
     unittest.main()

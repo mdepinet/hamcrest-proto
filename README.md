@@ -46,7 +46,7 @@ Test the argument equals the given protobuf message, ignoring the ordering of an
 ```python
 partially(matcher: Matcher[Message])
 ```
-Test the argument partially equals the given protobuf message, i.e. if a field is in the argument but not in the expected message, it's ignored in the comparsion.
+Test the argument partially equals the given protobuf message, i.e. if a field is in the argument but not in the expected message, it's ignored in the comparison.
 
 ## Development
 

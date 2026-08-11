@@ -350,14 +350,7 @@ def _explain_diff(cmp_args: ProtoFieldComparisonArgs):
     return f"modified: {field_path_with_index}: {expected} -> {actual}\n"
 
 
-def _readable(
-    value: Any,
-    value_desc: _AnyFieldDescriptor,
-    key_desc: _AnyFieldDescriptor | None = None,
-) -> str:
-    if key_desc and value:
-        key, value = value
-        return f"key: {_readable(key, key_desc)}value: {_readable(value, value_desc)}"
+def _readable(value: Any, value_desc: _AnyFieldDescriptor) -> str:
     if _is_enum(value_desc):
         return _get_enum_name(value, value_desc)
     if type(value) == str:
@@ -366,7 +359,7 @@ def _readable(
 
 
 def _get_enum_name(enum_value: int, field_desc: _AnyFieldDescriptor) -> str:
-    return field_desc.enum_type.values[enum_value].name
+    return field_desc.enum_type.values_by_number[enum_value].name
 
 
 def _get_float_comparison_epsilon(field_desc: _AnyFieldDescriptor):
