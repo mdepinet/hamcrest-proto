@@ -12,11 +12,11 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
-      - name: Check the release tag matches setup.py's version
+      - name: Check the release tag matches pyproject.toml's version
         run: |
-          VERSION="$(sed -n 's/.*version="\([^"]*\)".*/\1/p' setup.py)"
+          VERSION="$(sed -n 's/^version = "\([^"]*\)".*/\1/p' pyproject.toml)"
           if [ "$VERSION" != "$GITHUB_REF_NAME" ]; then
-            echo "setup.py has version $VERSION but the release tag is $GITHUB_REF_NAME" >&2
+            echo "pyproject.toml has version $VERSION but the release tag is $GITHUB_REF_NAME" >&2
             exit 1
           fi
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5

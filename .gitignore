@@ -131,3 +131,7 @@ dmypy.json
 bazel-*
 
 .pypirc
+
+# Generated protobuf code (regenerate with `just gen-protos`)
+*_pb2.py
+*_pb2.pyi

@@ -32,6 +32,8 @@ message Baz {
     STATUS_UNSPECIFITED = 0;
     OK = 1;
     ERROR = 2;
+    // Deliberately sparse: pins name lookup by number rather than list index.
+    OBSOLETE = 20;
   }
   Status status = 1;
 }

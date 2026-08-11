@@ -1,0 +1,64 @@
+[project]
+name = "hamcrest-proto"
+version = "0.0.8"
+description = "Hamcrest matchers for protobufs"
+readme = "README.md"
+authors = [{ name = "mdepinet" }]
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+dependencies = [
+    "protobuf>=3.20",
+    "pyhamcrest>=2.0.2",
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/mdepinet/hamcrest-proto"
+
+[build-system]
+requires = ["uv_build>=0.9.17,<0.10.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "proto_matcher"
+module-root = ""
+# Generated protobuf code must never ship: consumers regenerate against their
+# own runtime, and the runtime rejects gencode newer than itself. The test
+# proto source is dev-only, so it stays out of published artifacts too.
+source-exclude = ["**/*_pb2.py", "**/*_pb2.pyi", "proto_matcher/testdata"]
+wheel-exclude = ["**/*_pb2.py", "**/*_pb2.pyi", "proto_matcher/testdata"]
+
+[dependency-groups]
+dev = [
+    { include-group = "test" },
+    "deptry>=0.23",
+    "grpcio-tools>=1.66",
+    "pyright>=1.1.400",
+    "ruff>=0.12",
+]
+# Kept separate from dev so the CI test matrix can sync just this group on
+# Pythons the dev tools may not support.
+test = [
+    "pytest>=8",
+]
+
+[tool.ruff.lint]
+extend-select = ["I", "B"]
+isort.force-single-line = true
+isort.single-line-exclusions = ["typing", "collections.abc", "hamcrest"]
+
+[tool.pyright]
+# Check against the oldest supported Python, not whichever interpreter uv picks.
+pythonVersion = "3.9"
+exclude = ["build", "dist", ".venv", "**/__pycache__"]
+
+[tool.deptry]
+extend_exclude = [".*_test\\.py", "build"]
+known_first_party = ["proto_matcher"]
+
+[tool.pytest.ini_options]
+testpaths = ["proto_matcher"]

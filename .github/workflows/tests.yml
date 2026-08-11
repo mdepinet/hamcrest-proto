@@ -6,16 +6,28 @@ on:
   pull_request:
 
 jobs:
+  checks:
+    name: ruff, pyright, deptry
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+      - uses: extractions/setup-just@v2
+      - run: just install
+      - run: just check
+
   test:
-    name: protobuf ${{ matrix.protobuf || 'latest' }}
+    name: protobuf ${{ matrix.protobuf || 'lockfile' }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
         # One representative per protobuf major version, each on a Python it
-        # supports. The empty pin means "latest release", so new majors get
-        # covered here before they get their own pinned entry.
+        # supports. The empty pin means "whatever uv.lock pins" (kept fresh by
+        # dependabot), so new majors get covered by lock bumps before they get
+        # their own pinned entry here.
         include:
           - protobuf: "3.20.*"
             python: "3.9"
@@ -26,20 +38,19 @@ jobs:
           - protobuf: "6.*"
             python: "3.13"
           - protobuf: ""
-            python: "3.x"
+            python: "3.14"
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python }}
       - name: Install dependencies
-        run: |
-          pip install pytest pyhamcrest
-          if [ -n "${{ matrix.protobuf }}" ]; then
-            pip install "protobuf==${{ matrix.protobuf }}"
-          else
-            pip install protobuf
-          fi
+        # Just the test group: the dev tools don't need to support every
+        # Python in the matrix.
+        run: uv sync --locked --no-default-groups --group test
+      - name: Pin the protobuf runtime under test
+        if: matrix.protobuf != ''
+        run: uv pip install "protobuf==${{ matrix.protobuf }}"
       - name: Install the protoc matching the protobuf runtime
         # The runtime rejects gencode newer than itself and old runtimes lack
         # the APIs new gencode calls, so the test proto must be compiled with
@@ -47,7 +58,7 @@ jobs:
         # to protoc v3.X.Y, and pip MAJOR.MINOR.PATCH maps to protoc
         # vMINOR.PATCH from 4.x on.
         run: |
-          PB="$(python -c 'import google.protobuf as pb; print(pb.__version__)')"
+          PB="$(uv run --no-sync python -c 'import google.protobuf as pb; print(pb.__version__)')"
           case "$PB" in
             3.*) PROTOC="$PB" ;;
             *) PROTOC="${PB#*.}" ;;
@@ -57,4 +68,4 @@ jobs:
           echo "$HOME/protoc/bin" >> "$GITHUB_PATH"
       - name: Generate test protos
         run: protoc -I. -I"$HOME/protoc/include" --python_out=. proto_matcher/testdata/test.proto
-      - run: python -m pytest proto_matcher
+      - run: uv run --no-sync pytest proto_matcher
